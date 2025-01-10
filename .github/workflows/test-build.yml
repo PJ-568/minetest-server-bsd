@@ -44,6 +44,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
+        repository: 'minetest/minetest'
         submodules: true
         ref: ${{ inputs.branch_name }}
 
