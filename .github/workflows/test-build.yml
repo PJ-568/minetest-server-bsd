@@ -64,9 +64,9 @@ jobs:
         cpu_count: 4
         run: |
           # Install dependencies
-          if [ "${{ matrix.os.name }}" == "freebsd" ]; then sudo pkg update; sudo pkg install -y cmake git irrlicht libpng sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
-          if [ "${{ matrix.os.name }}" == "openbsd" ]; then sudo pkg_add -Uv cmake git irrlicht libpng sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
-          if [ "${{ matrix.os.name }}" == "netbsd" ]; then sudo pkgin -y update; sudo pkgin -y install cmake git irrlicht libpng sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
+          if [ "${{ matrix.os.name }}" == "freebsd" ]; then sudo pkg update; sudo pkg install -y cmake git irrlicht sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
+          if [ "${{ matrix.os.name }}" == "openbsd" ]; then sudo pkg_add -Uv cmake git irrlicht sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
+          if [ "${{ matrix.os.name }}" == "netbsd" ]; then sudo pkgin -y update; sudo pkgin -y install cmake git irrlicht sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
           # Create build directory
           mkdir cmakebuild
           cmake .. \
