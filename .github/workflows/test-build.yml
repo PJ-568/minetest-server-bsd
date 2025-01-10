@@ -1,0 +1,87 @@
+name: Minetest Server Build Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch name'
+        required: true
+        default: master
+        type: string
+      sys_name:
+        description: 'System name'
+        required: true
+        default: freebsd
+        type: choice
+        options:
+          - freebsd
+          - openbsd
+          - netbsd
+      sys_arch:
+        description: 'System architecture'
+        required: true
+        default: x86-64
+        type: choice
+        options:
+          - x86-64
+          - arm64
+      sys_ver:
+        description: 'System version. Checkout https://github.com/cross-platform-actions/action#supported-platforms for supported versions'
+        required: true
+        default: '14.2'
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - name: ${{ inputs.sys_name }}
+            architecture: ${{ inputs.sys_arch }}
+            version: ${{ inputs.sys_ver }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+        ref: ${{ inputs.branch_name }}
+
+    - name: Build minetest_server on ${{ matrix.os.name }}
+      uses: cross-platform-actions/action@v0.26.0
+      env:
+        OS_NAME: ${{ matrix.os.name }}
+        OS_ARCH: ${{ matrix.os.architecture }}
+        OS_VER: ${{ matrix.os.version }}
+        GAME_VER: ${{ inputs.branch_name }}
+      with:
+        environment_variables: OS_NAME OS_ARCH OS_VER GAME_VER
+        operating_system: ${{ matrix.os.name }}
+        architecture: ${{ matrix.os.architecture }}
+        version: ${{ matrix.os.version }}
+        shell: bash
+        cpu_count: 4
+        run: |
+          # Install dependencies
+          # sudo pkg update
+          # sudo pkg install -y cmake git irrlicht libpng sqlite3 lua52 luajit openal-soft libvorbis libogg
+          # Create build directory
+          mkdir cmakebuild
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SERVER=TRUE \
+            -DENABLE_PROMETHEUS=TRUE \
+            -DBUILD_UNITTESTS=FALSE \
+            -DBUILD_CLIENT=FALSE && \
+          make -j$(nproc)
+          # Package
+          tar -czvf minetest-server-${GAME_VER}-${OS_NAME}-${OS_ARCH}-${OS_VER}.tar.gz -C minetest/cmakebuild minetestserver
+          ls -Rl > cmakebuild/ls.txt
+
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: minetest-server-freebsd
+        path: cmakebuild/
