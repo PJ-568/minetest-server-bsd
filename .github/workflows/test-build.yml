@@ -26,7 +26,7 @@ on:
           - x86-64
           - arm64
       sys_ver:
-        description: 'System version. Checkout https://github.com/cross-platform-actions/action#supported-platforms for supported versions'
+        description: 'System version. Checkout [supported-platforms](https://github.com/cross-platform-actions/action#supported-platforms) for supported versions'
         required: true
         default: '14.2'
         type: string
@@ -64,8 +64,9 @@ jobs:
         cpu_count: 4
         run: |
           # Install dependencies
-          # sudo pkg update
-          # sudo pkg install -y cmake git irrlicht libpng sqlite3 lua52 luajit openal-soft libvorbis libogg
+          if [ "${{ matrix.os.name }}" == "freebsd" ]; then sudo pkg update; sudo pkg install -y cmake git irrlicht libpng sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
+          if [ "${{ matrix.os.name }}" == "openbsd" ]; then sudo pkg_add -Uv cmake git irrlicht libpng sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
+          if [ "${{ matrix.os.name }}" == "netbsd" ]; then sudo pkgin -y update; sudo pkgin -y install cmake git irrlicht libpng sqlite3 lua52 luajit openal-soft libvorbis libogg; fi
           # Create build directory
           mkdir cmakebuild
           cmake .. \
